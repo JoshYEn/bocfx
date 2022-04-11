@@ -50,12 +50,12 @@ def asexec():
 
         elif opt in ('-o','--op'):
             op = arg
-        
+
         elif opt in ('-b','--bar'):
             bar = 1
 
     output = main(FX, sort, time, plot, csv, pt, op, bar)
-    sys.exit() 
+    sys.exit()
 
 
 def bocfx(FX=0, sort=0, time=-1, plot=0, csv=0, pt=0, op='~/bocfx_output', bar=0):
@@ -88,11 +88,11 @@ def page_get(output, sort, FX_or, erectDate, nothing, FX, i, page, end):
     html = r.text
     for row in range(2,end):
         try:
-            SE_B = Selector(text=html).xpath('//tr[%i]/td[2]/text()' % (row)).extract()[0]
-            BN_B = Selector(text=html).xpath('//tr[%i]/td[3]/text()' % (row)).extract()[0]
-            SE_A = Selector(text=html).xpath('//tr[%i]/td[4]/text()' % (row)).extract()[0]
-            BN_A = Selector(text=html).xpath('//tr[%i]/td[5]/text()' % (row)).extract()[0]
-            time = Selector(text=html).xpath('//tr[%i]/td[7]/text()' % (row)).extract()[0].replace('.','-')
+            SE_B = Selector(text=html).xpath('//tr[%i]/td[2]/text()' % (row)).extract()[0].replace('\r\n','').strip()
+            BN_B = Selector(text=html).xpath('//tr[%i]/td[3]/text()' % (row)).extract()[0].replace('\r\n','').strip()
+            SE_A = Selector(text=html).xpath('//tr[%i]/td[4]/text()' % (row)).extract()[0].replace('\r\n','').strip()
+            BN_A = Selector(text=html).xpath('//tr[%i]/td[5]/text()' % (row)).extract()[0].replace('\r\n','').strip()
+            time = Selector(text=html).xpath('//tr[%i]/td[7]/text()' % (row)).extract()[0].replace('.','-').replace('\r\n','').strip()
             output.append(eval(sort))
 
         except IndexError:
@@ -123,8 +123,8 @@ def main(FX, sort, time, plot, csv, pt, op, bar):
         FX = FX_ed
 
     else:
-        FX = ['英镑', '欧元', '美元', '加拿大元', '澳大利亚元']
-        FX_or = ['GBP', 'EUR', 'USD', 'CAD', 'AUD']
+        FX = ['日元']
+        FX_or = ['JPY']
 
 
     if sort != 0:
@@ -170,7 +170,7 @@ def main(FX, sort, time, plot, csv, pt, op, bar):
             tegart_nof = today_nof - datetime.timedelta(days=int(time))
             erectDate = str(tegart_nof)
             nothing = str(today_nof)
-            
+
         elif ',' in time:
             time = time.split(",")
             erectDate = str(time[0])
@@ -206,7 +206,7 @@ def main(FX, sort, time, plot, csv, pt, op, bar):
         all_task = [ex.submit(page_get, output, sort, FX_or, '', '', FX, i, '1', 3) for i in range(len(FX))]
         [i.result() for i in show_prog(all_task, ifbar=bar)]
         ex.shutdown(wait=True)
-        
+
         t=[output[0]]
         for i in range(len(FX_or)):
             for f in range(len(output)):
@@ -266,7 +266,7 @@ def main(FX, sort, time, plot, csv, pt, op, bar):
         if not os.path.exists(op):
             os.makedirs(op)
         plotpath = os.path.join(op,filename)+'.png'
-        
+
         plt.savefig(plotpath, dpi=150)
         print('\nPlot has already saved to '+plotpath)
         plt.show()
