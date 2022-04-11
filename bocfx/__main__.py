@@ -247,27 +247,34 @@ def main(FX, sort, time, plot, csv, pt, op, bar):
     if plot != 0:
         import numpy as np
         import matplotlib.pyplot as plt
+        import matplotlib.dates as dates
 
         p = np.array(output)
         fl = len(FX_or)
-        plt.figure(figsize=(13, 8.5))
+        fig = plt.figure(figsize=(13, 8.5))
 
         for f in range(fl):
             plt.subplot(fl,1,f+1)
             sd = p[np.where(p[:][:,0] == FX_or[f])]
             x = sd[:,-1][:].astype(np.datetime64)
 
-            for i in range(1,len(output[0])-1):
-                plt.plot(x,sd[:,i][:].astype(float),label='['+FX_or[f]+']'+str(p[:,i][0])+': '+str(sd[:,i][0]))
+            # for i in range(1,len(output[0])-1):
+            i = 1
+            plt.plot(x,sd[:,i][:].astype(float),label='['+FX_or[f]+']'+str(p[:,i][0])+': '+str(sd[:,i][0]))
 
-            plt.legend(loc=2)
+            plt.title(FX_or[f] + ' - Spot Exchange - BID')
+            # plt.legend(loc='best')
+            plt.margins(x=0.01)
+            plt.grid(True)
+            ax = plt.gca()
+            ax.xaxis.set_major_formatter(dates.DateFormatter('%b %d\n%H:%M'))
 
         op = os.path.expanduser(op)
         if not os.path.exists(op):
             os.makedirs(op)
         plotpath = os.path.join(op,filename)+'.png'
 
-        plt.savefig(plotpath, dpi=150)
+        plt.savefig(plotpath, dpi=150, bbox_inches='tight')
         print('\nPlot has already saved to '+plotpath)
         plt.show()
 
