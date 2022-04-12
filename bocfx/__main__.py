@@ -170,8 +170,8 @@ def main(FX, sort, time, plot, csv, pt, op, bar):
             sh = pytz.timezone('Asia/Shanghai')
             today_nof = datetime.datetime.now(sh)
             tegart_nof = today_nof - datetime.timedelta(days=int(time))
-            erectDate = str(tegart_nof)
-            nothing = str(today_nof)
+            erectDate = str(tegart_nof.strftime('%Y-%m-%d'))
+            nothing = str(today_nof.strftime('%Y-%m-%d'))
 
         elif ',' in time:
             time = time.split(",")
