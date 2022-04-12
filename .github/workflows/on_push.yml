@@ -20,6 +20,12 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        cid: [0, 1]
+    env:
+      CHAT_ID: ${{ secrets[format('TELEGRAM_TO_{0}', matrix.env)] }}
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -44,7 +50,7 @@ jobs:
       - name: Send Photo Message Quick
         uses: appleboy/telegram-action@master
         with:
-          to: ${{ secrets.TELEGRAM_TO }}
+          to: $CHAT_ID
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: New push
           photo: tests/github.png
