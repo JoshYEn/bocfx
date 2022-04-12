@@ -19,6 +19,12 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        cid: [0, 1]
+    env:
+      CHAT_ID: ${{ secrets[format('TELEGRAM_TO_{0}', matrix.cid)] }}
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -45,7 +51,7 @@ jobs:
         if: github.event.schedule == '6/10 * * * *'
         uses: appleboy/telegram-action@master
         with:
-          to: ${{ secrets.TELEGRAM_TO }}
+          to: ${{ env.CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: Quick Message
           photo: tests/github.png
@@ -59,7 +65,7 @@ jobs:
         if: github.event.schedule == '59 2,6,10 * * *'
         uses: appleboy/telegram-action@master
         with:
-          to: ${{ secrets.TELEGRAM_TO }}
+          to: ${{ env.CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: Daily Message
           photo: tests/github.png

@@ -1,14 +1,12 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI on push
+name: CI scheduled - 2h
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  schedule:
+    - cron:  '18 0/2 * * *'
+    - cron:  '18 0/4 * * *'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -22,7 +20,7 @@ jobs:
 
     strategy:
       matrix:
-        cid: [0]
+        cid: [0, 2]
     env:
       CHAT_ID: ${{ secrets[format('TELEGRAM_TO_{0}', matrix.cid)] }}
 
@@ -45,14 +43,44 @@ jobs:
         run: pip install -r bocfx.egg-info/requires.txt
 
       - name: Run Main App Quick Update
+        if: github.event.schedule == '18 0/2 * * *'
         run: python bocfx/__main__.py -p -t 1 -o output
 
       - name: Send Photo Message Quick
+        if: github.event.schedule == '18 0/2 * * *'
         uses: appleboy/telegram-action@master
         with:
           to: ${{ env.CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: New push
+          message: 两小时推送来啦，中行现汇买入价（1天涨跌）
+          photo: tests/github.png
+          document: output/*.png
+
+      - name: Run Main App Daily Update
+        if: github.event.schedule == '18 0/4 * * *'
+        run: python bocfx/__main__.py -p -t 7 -o output
+
+      - name: Send Photo Message Daily
+        if: github.event.schedule == '18 0/4 * * *'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ env.CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: 四小时推送来啦，中行现汇买入价（7天涨跌）
+          photo: tests/github.png
+          document: output/*.png
+
+      - name: Run Main App Quick Update
+        if: github.event_name == 'workflow_dispatch'
+        run: python bocfx/__main__.py -p -t 1 -o output
+
+      - name: Send Photo Message Quick
+        if: github.event_name == 'workflow_dispatch'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ env.CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: 手动推送来啦，中行现汇买入价（1天涨跌）
           photo: tests/github.png
           document: output/*.png
 
