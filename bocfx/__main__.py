@@ -166,7 +166,9 @@ def main(FX, sort, time, plot, csv, pt, op, bar):
 
     if time != -1:
         if len(str(time)) < 5:
-            today_nof = datetime.date.today()
+            import pytz
+            sh = pytz.timezone('Asia/Shanghai')
+            today_nof = datetime.datetime.today(sh)
             tegart_nof = today_nof - datetime.timedelta(days=int(time))
             erectDate = str(tegart_nof)
             nothing = str(today_nof)

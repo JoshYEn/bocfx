@@ -1,13 +1,14 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI scheduled
+name: CI on push
 
 # Controls when the workflow will run
 on:
-  schedule:
-    # - cron:  '6/10 0-14 * * *'
-    - cron:  '6/10 * * * *'
-    - cron:  '59 2,6,10 * * *'
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -38,30 +39,14 @@ jobs:
         run: pip install -r bocfx.egg-info/requires.txt
 
       - name: Run Main App Quick Update
-        if: github.event.schedule == '6/10 * * * *'
         run: python bocfx/__main__.py -p -t 1 -o output
 
       - name: Send Photo Message Quick
-        if: github.event.schedule == '6/10 * * * *'
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: Quick Message
-          photo: tests/github.png
-          document: output/*.png
-
-      - name: Run Main App Daily Update
-        if: github.event.schedule == '59 2,6,10 * * *'
-        run: python bocfx/__main__.py -p -t 7 -o output
-
-      - name: Send Photo Message Daily
-        if: github.event.schedule == '59 2,6,10 * * *'
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: Daily Message
+          message: New push
           photo: tests/github.png
           document: output/*.png
 
