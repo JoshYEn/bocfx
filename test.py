@@ -1,2 +1,0 @@
-from bocfx import *
-asexec()

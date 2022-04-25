@@ -70,6 +70,7 @@ def bocfx(FX=0, sort=0, time=-1, plot=0, csv=0, pt=0, op='~/bocfx_output', bar=0
     output = main(FX, sort, time, plot, csv, pt, op, bar)
     return output
 
+class rerun(Exception): pass
 
 def page_get(output, sort, FX_or, erectDate, nothing, FX, i, page, end):
     error_times = 0
@@ -86,18 +87,29 @@ def page_get(output, sort, FX_or, erectDate, nothing, FX, i, page, end):
             exit()
 
     html = r.text
-    for row in range(2,end):
-        try:
-            SE_B = Selector(text=html).xpath('//tr[%i]/td[2]/text()' % (row)).extract()[0].replace('\r\n','').strip()
-            BN_B = Selector(text=html).xpath('//tr[%i]/td[3]/text()' % (row)).extract()[0].replace('\r\n','').strip()
-            SE_A = Selector(text=html).xpath('//tr[%i]/td[4]/text()' % (row)).extract()[0].replace('\r\n','').strip()
-            BN_A = Selector(text=html).xpath('//tr[%i]/td[5]/text()' % (row)).extract()[0].replace('\r\n','').strip()
-            time = Selector(text=html).xpath('//tr[%i]/td[7]/text()' % (row)).extract()[0].replace('.','-').replace('\r\n','').strip()
-            output.append(eval(sort))
+    print("querying page %s" % (page))
+    tmp = Selector(text=html).xpath('//tr[2]/th[1]/text()').extract()
 
-        except IndexError:
-            break
+    try:
+        if len(tmp) != 0:
+            print(tmp[0])
+            raise rerun()
+    except rerun:  # where to goto
+        print("rerun called")
+        page_get(output, sort, FX_or, erectDate, nothing, FX, i, page, end)
+    else:
+        for row in range(2,end):
+            try:
+                SE_B = Selector(text=html).xpath('//tr[%i]/td[2]/text()' % (row)).extract()[0].replace('\r\n','').strip()
+                BN_B = Selector(text=html).xpath('//tr[%i]/td[3]/text()' % (row)).extract()[0].replace('\r\n','').strip()
+                SE_A = Selector(text=html).xpath('//tr[%i]/td[4]/text()' % (row)).extract()[0].replace('\r\n','').strip()
+                BN_A = Selector(text=html).xpath('//tr[%i]/td[5]/text()' % (row)).extract()[0].replace('\r\n','').strip()
+                time = Selector(text=html).xpath('//tr[%i]/td[7]/text()' % (row)).extract()[0].replace('.','-').replace('\r\n','').strip()
+                output.append(eval(sort))
 
+            except IndexError:
+                break
+        print("querying page %s, done: %s" % (page, SE_B))
 
 def show_prog(all, ifbar=False):
     if ifbar:
@@ -196,12 +208,13 @@ def main(FX, sort, time, plot, csv, pt, op, bar):
             ex = ThreadPoolExecutor(max_workers=20)
             for page in range(1,(pages+1)):
                 all_task.append(ex.submit(page_get, output, sort, FX_or, erectDate, nothing, FX, i, page, 22))
+                # all_task.append(page_get(output, sort, FX_or, erectDate, nothing, FX, i, page, 22))
 
         [i.result() for i in show_prog(all_task, ifbar=bar)]
         ex.shutdown(wait=True)
         output = list(set(output))
         output.sort(reverse=True,key=lambda ele:ele[-1])
-        filename = '['+'+'.join(FX_or)+']'+'+'.join(output[0][1:-1])+'_'+erectDate+'_'+nothing
+        filename = '['+'+'.join(FX_or)+']'+ time + "D" +'_'+erectDate+'_'+nothing
 
     else:
         ex = ThreadPoolExecutor(max_workers=20)
@@ -261,11 +274,13 @@ def main(FX, sort, time, plot, csv, pt, op, bar):
             x = sd[:,-1][:].astype(np.datetime64)
 
             # for i in range(1,len(output[0])-1):
-            i = 1
+            # for i in [1,3]:
+            i = 3
             plt.plot(x,sd[:,i][:].astype(float),label='['+FX_or[f]+']'+str(p[:,i][0])+': '+str(sd[:,i][0]))
 
-            plt.title(FX_or[f] + ' - Spot Exchange - BID')
-            # plt.legend(loc='best')
+            plt.title(FX_or[f] + ' - Spot Exchange - ASK')
+            plt.legend(loc='best')
+            plt.legend(['JPY'])
             plt.margins(x=0.01)
             plt.grid(True)
             ax = plt.gca()
