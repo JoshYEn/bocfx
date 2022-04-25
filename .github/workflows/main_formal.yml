@@ -83,5 +83,19 @@ jobs:
           message: 手动推送来啦，中行现汇买入价（1天涨跌）
           photo: tests/github.png
           document: output/*.png
+      
+      - name: Run Main App Daily Update
+        if: github.event_name == 'workflow_dispatch'
+        run: python bocfx/__main__.py -p -t 21 -o output
+
+      - name: Send Photo Message Daily
+        if: github.event_name == 'workflow_dispatch'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ env.CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: 四小时推送来啦，中行现汇买入价（21天涨跌）
+          photo: tests/github.png
+          document: output/*.png
 
       - uses: actions/checkout@master
