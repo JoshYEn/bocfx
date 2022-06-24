@@ -23,6 +23,7 @@ jobs:
         cid: [0, 2]
     env:
       CHAT_ID: ${{ secrets[format('TELEGRAM_TO_{0}', matrix.cid)] }}
+    timeout-minutes: 10
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
