@@ -18,12 +18,12 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        cid: [0, 2]
-    env:
-      CHAT_ID: ${{ secrets[format('TELEGRAM_TO_{0}', matrix.cid)] }}
-    timeout-minutes: 20
+    # strategy:
+      # matrix:
+        # cid: [0, 2]
+    # env:
+      # CHAT_ID: ${{ secrets[format('TELEGRAM_TO_{0}', matrix.cid)] }}
+    timeout-minutes: 30
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -43,34 +43,60 @@ jobs:
       - name: Install Dependencies
         run: pip install -r bocfx.egg-info/requires.txt
 
+
+      ## QUICK UPDATE EVERY 2 HOURS
       - name: Run Main App Quick Update
         if: github.event.schedule == '18 0/2 * * *'
         run: python bocfx/__main__.py -p -t 1 -o output
 
-      - name: Send Photo Message Quick
+      - name: Send Photo Message Quick 1
         if: github.event.schedule == '18 0/2 * * *'
         uses: appleboy/telegram-action@master
         with:
-          to: ${{ env.CHAT_ID }}
+          # to: ${{ env.CHAT_ID }}
+          to: ${{ secrets.TELEGRAM_TO_0 }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: 两小时推送来啦，中行现汇买入价（1天涨跌）
+          photo: tests/github.png
+          document: output/*.png
+      - name: Send Photo Message Quick 2
+        if: github.event.schedule == '18 0/2 * * *'
+        uses: appleboy/telegram-action@master
+        with:
+          # to: ${{ env.CHAT_ID }}
+          to: ${{ secrets.TELEGRAM_TO_2 }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: 两小时推送来啦，中行现汇买入价（1天涨跌）
           photo: tests/github.png
           document: output/*.png
 
+
+      ## DAILY UPDATE EVERY 4 HOURS
       - name: Run Main App Daily Update
         if: github.event.schedule == '18 0/4 * * *'
         run: python bocfx/__main__.py -p -t 21 -o output
 
-      - name: Send Photo Message Daily
+      - name: Send Photo Message Daily 1
         if: github.event.schedule == '18 0/4 * * *'
         uses: appleboy/telegram-action@master
         with:
-          to: ${{ env.CHAT_ID }}
+          to: ${{ secrets.TELEGRAM_TO_0 }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: 四小时推送来啦，中行现汇买入价（21天涨跌）
+          photo: tests/github.png
+          document: output/*.png
+      - name: Send Photo Message Daily 2
+        if: github.event.schedule == '18 0/4 * * *'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO_2 }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: 四小时推送来啦，中行现汇买入价（21天涨跌）
           photo: tests/github.png
           document: output/*.png
 
+
+      ## DISPATCH - MANUUAL UPDATE
       - name: Run Main App Quick Update
         if: github.event_name == 'workflow_dispatch'
         run: python bocfx/__main__.py -p -t 1 -o output
@@ -79,12 +105,13 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: appleboy/telegram-action@master
         with:
-          to: ${{ env.CHAT_ID }}
+          # to: ${{ env.CHAT_ID }}
+          to: ${{ secrets.TELEGRAM_TO_0 }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: 手动推送来啦，中行现汇买入价（1天涨跌）
           photo: tests/github.png
           document: output/*.png
-      
+
       - name: Run Main App Daily Update
         if: github.event_name == 'workflow_dispatch'
         run: python bocfx/__main__.py -p -t 21 -o output
@@ -93,9 +120,10 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: appleboy/telegram-action@master
         with:
-          to: ${{ env.CHAT_ID }}
+          # to: ${{ env.CHAT_ID }}
+          to: ${{ secrets.TELEGRAM_TO_0 }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: 四小时推送来啦，中行现汇买入价（21天涨跌）
+          message: 手动推送来啦，中行现汇买入价（21天涨跌）
           photo: tests/github.png
           document: output/*.png
 
